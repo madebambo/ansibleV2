@@ -1,0 +1,75 @@
+---
+
+- hosts: webservers
+  become: true
+  tasks:
+
+  - name: install updates (Redhat)
+    tags: always
+    dnf:
+      update_only: yes
+      update_cache: yes
+
+  - name: install httpd and php package
+    tags: RedHat
+    dnf:
+      name:
+        - httpd
+        - php
+      state: latest
+
+  - name: start httpd (RedHat)
+    tags: apache,httpd
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+  
+  - name: copy default html file for site
+    tags: RedHat
+    copy:
+      src: default_site.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: add ssh key for simone
+    tags: always
+    authorized_key:
+      user: simone
+      key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCqoxFtSX0oNEhZWZWr6TILdE4TPx7aKb+np7AFeQ17UdSN8Ti7b1QbU3EJESJ5jlPCFuvK5O3icjZGwcP0pVXiB8+um92osZLPhfjhRah8fy2UJT7N7WjLws1ezS1BdkcRmK+HSxaeuL67EFa8Eb2q5Aj9OR8Ykux6M4Crc9Pswa/OAGbINsZ9cVG+l1KzK+8al3dBl/ypK1ebHH0yc7/kaU/ONCziEBYpVaZptdDGH22rNTgsO1vxd103X++h9aYMRkPdfrZcvV8PNa1BP42ePXoi1cd6/rV3azhy8qSHBZje5v4sKCTf+zW86niSUrmdc9hnHpl/MKmZNf4KcCSmHe5lTNxiB1fDNmqIPsBY+UAD9CX9794sBxGmz0R63/BKvCyuA7htDVDnyu9SVfu0NKY0Dgo9KXPz4Hi1AF7fqQjatdsR/HSAC5YX6t2hkVXeGsE2kgU0wcouYsC5obZV021mZg5QTDm//rj0t23IGvx1Mc1SMqL1MpYdeJIe5OM= ansible"
+
+
+- hosts: webservers
+  become: true
+  tasks:
+
+  - name: install unzip
+    package:
+       name: unzip
+
+  - name: install terraform
+    unarchive:
+      src: https://releases.hashicorp.com/terraform/1.6.3/terraform_1.6.3_linux_amd64.zip
+      dest: /usr/local/bin
+      remote_src: yes
+      mode: 0755
+      owner: root
+      group: root
+
+- hosts: dbserver
+  become: true
+  tasks:
+
+  - name: install mariadb package (RedHat)
+    tags: mariadb
+    dnf:
+      name: mariadb
+      state: latest
+
+
