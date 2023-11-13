@@ -25,21 +25,6 @@
       state: started
       enabled: yes
   
-  - name: change e-mail address for admin
-    tags: apache,httpd
-    lineinfile:
-      path: /etc/httpd/conf/httpd.conf
-      regexp: '^ServerAdmin'
-      line: ServerAdmin somebody@somewhere.net
-    register: httpd
-
-  - name: restart httpd (RedHat)
-    tags: apache,httpd
-    service:
-      name: httpd
-      state: restarted
-    when: httpd.changed
-
   - name: copy default html file for site
     tags: RedHat
     copy:
@@ -48,6 +33,33 @@
       owner: root
       group: root
       mode: 0644
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: create simone user
+    tags: always
+    user:
+      name: simone
+      groups: root
+
+  - name: add ssh key for simone
+    tags: always
+    authorized_key:
+      user: simone
+      key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCqoxFtSX0oNEhZWZWr6TILdE4TPx7aKb+np7AFeQ17UdSN8Ti7b1QbU3EJESJ5jlPCFuvK5O3icjZGwcP0pVXiB8+um92osZLPhfjhRah8fy2UJT7N7WjLws1ezS1BdkcRmK+HSxaeuL67EFa8Eb2q5Aj9OR8Ykux6M4Crc9Pswa/OAGbINsZ9cVG+l1KzK+8al3dBl/ypK1ebHH0yc7/kaU/ONCziEBYpVaZptdDGH22rNTgsO1vxd103X++h9aYMRkPdfrZcvV8PNa1BP42ePXoi1cd6/rV3azhy8qSHBZje5v4sKCTf+zW86niSUrmdc9hnHpl/MKmZNf4KcCSmHe5lTNxiB1fDNmqIPsBY+UAD9CX9794sBxGmz0R63/BKvCyuA7htDVDnyu9SVfu0NKY0Dgo9KXPz4Hi1AF7fqQjatdsR/HSAC5YX6t2hkVXeGsE2kgU0wcouYsC5obZV021mZg5QTDm//rj0t23IGvx1Mc1SMqL1MpYdeJIe5OM= ansible"
+
+
+  - name: add sudoers file for simone
+    tags: always
+    copy:
+      src: sudoer_simone
+      dest: /etc/sudoers.d/simone
+      owner: root
+      group: root
+      mode: 0440
+
 
 - hosts: webservers
   become: true
