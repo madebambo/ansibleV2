@@ -1,0 +1,28 @@
+---
+
+- hosts: webservers
+  become: true
+  tasks:
+
+  - name: install updates (Redhat)
+    dnf:
+      update_only: yes
+      update_cache: yes
+
+  - name: install httpd and php package
+    dnf:
+      name:
+        - httpd
+        - php
+      state: latest
+
+- hosts: dbserver
+  become: true
+  tasks:
+
+  - name: install mariadb package (RedHat)
+    dnf:
+      name: mariadb
+      state: latest
+
+
