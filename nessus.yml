@@ -1,0 +1,37 @@
+---
+
+- hosts: webservers
+  become: true
+
+  tasks:
+  - name: install updates (Redhat)
+    tags: always
+    dnf:
+      update_only: yes
+      update_cache: yes
+
+  - name: Install curl
+    dnf:
+      name: curl
+      state: present
+
+  - name: Add the Nessus repository
+    yum_repository:
+      name: Nessus
+      description: Nessus Repository
+      baseurl: https://your-nessus-repo-url
+      gpgcheck: yes
+      gpgkey: https://your-nessus-repo-url/nessus.gpg.key
+      enabled: yes
+
+  - name: Install Nessus package
+    yum:
+      name: nessus
+      state: present
+
+  - name: Start Nessus service
+    systemd:
+      name: nessusd
+      state: started
+      enabled: yes
+

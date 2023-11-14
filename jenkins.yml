@@ -1,0 +1,57 @@
+---
+
+- hosts: dbserver
+  become: true
+
+  tasks:
+  - name: install updates (Redhat)
+    tags: always
+    dnf:
+      update_only: yes
+      update_cache: yes
+
+  - name: install wget
+    dnf:
+      name: wget
+      state: latest
+ 
+  - name: Download Long Term Jenkins release
+    get_url:
+      url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+      dest: /etc/yum.repos.d/jenkins.repo
+
+  - name: Import jenkins key from url
+    ansible.builtin.rpm_key:
+      state: present
+      key: https://pkg.jenkins.io/redhat/jenkins.io-2023.key
+
+
+  - name: install updates (Redhat)
+    tags: always
+    dnf:
+      update_only: yes
+      update_cache: yes
+
+  - name: Install java
+    dnf:
+      name: fontconfig,java-17-openjdk
+      state: latest
+
+  - name: Update package manager cache
+    dnf:
+      update_cache: yes
+
+  - name: Install jenkins
+    dnf:
+      name: jenkins
+      state: latest
+
+  - name: daemon-reload to pick up config changes
+    ansible.builtin.systemd:
+      daemon_reload: true
+
+  - name: Start jenkins
+    ansible.builtin.systemd:
+      enabled: yes
+      name: jenkins
+      state: started
